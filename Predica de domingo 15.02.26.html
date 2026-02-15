@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libreta de Predicación Profesional</title>
+    <style>
+        :root {
+            --color-titulo: #CC5500;
+            --color-subtitulo: #5D4037;
+            --color-texto: #333333;
+            --color-biblia: #D32F2F;
+            --size-titulo: 28px;
+            --size-cuerpo: 22px;
+            --bg-libreta: #FCFBF4;
+        }
+
+        body {
+            background-color: #E0E0E0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- Panel de Control --- */
+        #toolbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #222;
+            color: white;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .control-group { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        input[type="color"] { border: none; width: 25px; height: 25px; cursor: pointer; border-radius: 50%; }
+        input[type="range"] { cursor: pointer; }
+
+        /* --- Cronómetro --- */
+        #timer-container {
+            background: #333;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 20px;
+            color: #00FF00;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-ui {
+            background: #555;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .btn-ui:hover { background: #777; }
+
+        /* --- Libreta --- */
+        #paper {
+            background-color: var(--bg-libreta);
+            width: 90%;
+            max-width: 850px;
+            margin-top: 130px;
+            margin-bottom: 50px;
+            padding: 60px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            border-left: 12px solid #BDBDBD;
+            min-height: 100vh;
+            line-height: 1.6;
+            outline: none;
+        }
+
+        .header-news { 
+            color: #2E7D32; 
+            font-weight: bold; 
+            border-bottom: 1px solid #ccc; 
+            margin-bottom: 20px; 
+            font-size: var(--size-cuerpo);
+        }
+        
+        h1 { color: var(--color-titulo); font-size: var(--size-titulo); text-align: center; margin-top: 10px; font-weight: bold; }
+        h2 { color: var(--color-subtitulo); font-size: var(--size-cuerpo); margin-top: 40px; border-left: 6px solid var(--color-subtitulo); padding-left: 15px; font-weight: bold; text-transform: uppercase; }
+        
+        /* CORRECCIÓN: Los párrafos y textos bíblicos ahora usan la variable correctamente */
+        p, li, div, .texto-biblico { 
+            font-size: var(--size-cuerpo); 
+            color: var(--color-texto); 
+        }
+        
+        .texto-biblico { 
+            color: var(--color-biblia); 
+            font-style: italic; 
+            display: block; 
+            margin: 20px 0; 
+            border-left: 4px solid #F5F5F5; 
+            padding-left: 15px; 
+        }
+
+        .cita { font-weight: bold; color: #000 !important; font-style: normal; }
+        
+        .tesis {
+            background: #F9FBE7;
+            padding: 25px;
+            border-radius: 4px;
+            border: 1px dashed #AFB42B;
+            margin: 30px 0;
+            font-weight: bold;
+            font-size: var(--size-cuerpo);
+        }
+
+        hr { border: 0; border-top: 2px solid #eee; margin: 40px 0; }
+
+        @media print { 
+            #toolbar { display: none; } 
+            #paper { margin: 0; box-shadow: none; border: none; width: 100%; padding: 20px; } 
+        }
+    </style>
+</head>
+<body>
+
+<div id="toolbar">
+    <div class="control-group">
+        🎨 Títulos: <input type="color" id="colorT" value="#CC5500" onchange="updateStyles()">
+        Biblia: <input type="color" id="colorB" value="#D32F2F" onchange="updateStyles()">
+    </div>
+    <div class="control-group">
+        📏 Tms Título: <input type="range" id="sizeT" min="20" max="80" value="28" oninput="updateStyles()">
+        Tms Texto: <input type="range" id="sizeC" min="16" max="60" value="22" oninput="updateStyles()">
+    </div>
+    <div id="timer-container">
+        <span id="display">00:00:00</span>
+        <button class="btn-ui" onclick="startTimer()">INICIAR</button>
+        <button class="btn-ui" onclick="pauseTimer()">PAUSA</button>
+        <button class="btn-ui" onclick="resetTimer()">RESETEAR</button>
+    </div>
+    <button class="btn-ui" style="background: #0277BD;" onclick="window.print()">IMPRIMIR PDF</button>
+</div>
+
+<div id="paper" contenteditable="true" oninput="saveContent()">
+    <div class="header-news">
+        Buena Noticia: Juan 16:13 "Pero cuando venga el Espíritu de verdad, él os guiará a toda la verdad".
+    </div>
+
+    <h1>Jesús nos advierte contra un fraude común</h1>
+    <p style="text-align: center; font-weight: bold;">Recuperando el valor de la vida en un sistema de intercambio injusto</p>
+
+    <div class="texto-biblico">
+        <span class="cita">Mateo 16:26 (NVI):</span> <br>
+        «¿De qué sirve ganar el mundo entero si se pierde la vida? ¿O qué se puede dar a cambio de la vida?»
+    </div>
+
+    <div class="tesis">
+        "La verdadera tragedia del hombre no es la falta de éxito, sino caer en el fraude de intercambiar su identidad eterna por una seguridad temporal; una deuda de vida que solo puede ser saldada por el valor infinito de la obra de Cristo en la Cruz."
+    </div>
+
+    <hr>
+
+    <h2>I. Los Cuatro Pilares del Mensaje</h2>
+
+    <p><span class="cita">1. Tener Consciencia de Valor</span></p>
+    <p>Antes de cualquier advertencia, Jesús establece una verdad de identidad fundamental: <b>Tu ser es el activo más valioso del universo.</b> No eres valioso por lo que produces o logras, sino por Quién te sopló la vida.</p>
+    
+    <div class="texto-biblico">
+        <span class="cita">Génesis 2:7:</span> "Entonces el Señor Dios formó al hombre del polvo de la tierra, y sopló en su nariz aliento de vida, y fue el hombre un ser viviente".
+    </div>
+    
+    <p>La consciencia de valor es entender que tu alma (Zoe) es el aliento de Dios mismo. Como dice el versículo: <span class="cita">«¿Qué se puede dar a cambio de la vida?»</span>. Si Dios mismo invirtió Su aliento en ti, nada en el mercado terrenal iguala tu precio.</p>
+
+    <p><span class="cita">2. No permitir un Intercambio Injusto</span></p>
+    <p>Jesús expone la mecánica del fraude: <b>Ganar fuera a costa de perder dentro.</b> El sistema del mundo nos tienta a cambiar lo infinito por lo temporal.</p>
+    
+    <div class="texto-biblico">
+        <span class="cita">Proverbios 10:22:</span> "La bendición del Señor es la que enriquece, y no añade tristeza con ella".
+    </div>
+    
+    <p>El fraude ocurre al <span class="cita">«ganar el mundo entero»</span> entregando la paz que solo Dios da. Si la ganancia material añade la tristeza de una vida agotada, es un intercambio injusto.</p>
+
+    <p><span class="cita">3. La Imposibilidad Humana de Redimirse</span></p>
+    <p>Jesús destruye la ilusión de que podemos "comprar nuestra vuelta". Lo transitorio no tiene poder adquisitivo sobre lo infinito.</p>
+    
+    <div class="texto-biblico">
+        <span class="cita">Salmos 49:7-8:</span> "Nadie puede redimir a otro, ni pagar a Dios por su rescate, pues el precio de una vida es demasiado caro; ningún pago será jamás suficiente".
+    </div>
+    
+    <p>Jesús pregunta: <span class="cita">«¿De qué sirve ganar... si se pierde la vida?»</span>. Una vez que el alma se desgasta, el dinero acumulado no puede devolver el tiempo o la paz.</p>
+
+    <p><span class="cita">4. La Obra de Cristo en la Cruz</span></p>
+    <p>Lo que el hombre no pudo recomprar, Cristo lo rescató por completo. Ante la quiebra espiritual, Jesús aparece como nuestro Redentor.</p>
+    
+    <div class="texto-biblico">
+        <span class="cita">Marcos 10:45:</span> "Porque ni aun el Hijo del hombre vino para ser servido, sino para servir, y para dar su vida en rescate por muchos".
+    </div>
+    
+    <p>Ante la pregunta <span class="cita">«¿Qué se puede dar a cambio de la vida?»</span>, Cristo dio Su vida de valor infinito como moneda de cambio para devolvernos al reposo del Padre.</p>
+
+    <hr>
+
+    <h2>II. Aplicación Práctica: El Equilibrio de la Gracia</h2>
+
+    <p><span class="cita">A. Trabajar desde el Valor, no por el Valor</span></p>
+    <div class="texto-biblico"><span class="cita">Colosenses 3:23:</span> "Y todo lo que hagáis, hacedlo de corazón, como para el Señor..."</div>
+    <p>El trabajo es una expresión de tu identidad redimida, no una herramienta para intentar <span class="cita">«ganar el mundo»</span>.</p>
+
+    <p><span class="cita">B. Poseer sin ser Poseído</span></p>
+    <div class="texto-biblico"><span class="cita">1 Timoteo 6:17:</span> "A los ricos de este siglo manda que no sean altivos, ni pongan la esperanza en las riquezas... sino en el Dios vivo".</div>
+    <p>El dinero es un recurso útil para la vida diaria, pero nunca debe confundirse con la <span class="cita">«vida»</span> misma.</p>
+
+    <p><span class="cita">C. El Filtro del "Ganar fuera, sin Perder dentro"</span></p>
+    <div class="texto-biblico"><span class="cita">Mateo 6:33:</span> "Buscad primeramente el reino de Dios y su justicia, y todas estas cosas os serán añadidas".</div>
+    <p>Participamos en el sistema sabiendo que si el mundo entero se perdiera, nuestro activo más valioso permanece intacto.</p>
+
+    <div class="tesis" style="background: #E3F2FD; border-color: #2196F3; border-style: solid;">
+        <b>Declaración Final:</b> "El equilibrio de la Gracia es entender que, al haber sido rescatados por Cristo, ya no tenemos que dar nada <span class="cita">«a cambio de nuestra vida»</span>."
+    </div>
+</div>
+
+<script>
+    function updateStyles() {
+        const root = document.documentElement;
+        root.style.setProperty('--color-titulo', document.getElementById('colorT').value);
+        root.style.setProperty('--color-biblia', document.getElementById('colorB').value);
+        root.style.setProperty('--size-titulo', document.getElementById('sizeT').value + 'px');
+        root.style.setProperty('--size-cuerpo', document.getElementById('sizeC').value + 'px');
+    }
+
+    // Guardar cambios en el navegador
+    function saveContent() {
+        localStorage.setItem('predicacionContent', document.getElementById('paper').innerHTML);
+    }
+
+    // Cargar cambios al abrir
+    window.onload = function() {
+        const saved = localStorage.getItem('predicacionContent');
+        if (saved) document.getElementById('paper').innerHTML = saved;
+    }
+
+    let startTime, elapsedTime = 0, timerInterval;
+
+    function timeToString(time) {
+        let diffInHrs = time / 3600000;
+        let hh = Math.floor(diffInHrs);
+        let diffInMin = (diffInHrs - hh) * 60;
+        let mm = Math.floor(diffInMin);
+        let diffInSec = (diffInMin - mm) * 60;
+        let ss = Math.floor(diffInSec);
+        return `${hh.toString().padStart(2, "0")}:${mm.toString().padStart(2, "0")}:${ss.toString().padStart(2, "0")}`;
+    }
+
+    function printTimer(txt) { document.getElementById("display").innerHTML = txt; }
+
+    function startTimer() {
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(() => {
+            elapsedTime = Date.now() - startTime;
+            printTimer(timeToString(elapsedTime));
+        }, 1000);
+    }
+
+    function pauseTimer() { clearInterval(timerInterval); }
+    function resetTimer() { clearInterval(timerInterval); printTimer("00:00:00"); elapsedTime = 0; }
+</script>
+
+</body>
+</html>
